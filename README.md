@@ -27,7 +27,8 @@ cd MediaCrawler/
 python main.py --platform bili --lt qrcode --type creator
 ```
 - 数据拷贝
-```MediaCrawler/data/bilibili/json/```目录下的所有json文件拷贝至当前目录下的```data/```即可
+```MediaCrawler/data/bilibili/json/```目录下的所有json文件拷贝至当前目录下的```data/```即可。具体的数据格式可见根目录下的```examples/```
+
 ## Instruction
 安装环境依赖
 ```sh

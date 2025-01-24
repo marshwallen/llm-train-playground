@@ -30,7 +30,7 @@ python main.py --platform bili --lt qrcode --type creator
 ```MediaCrawler/data/bilibili/json/```目录下的所有json文件拷贝至当前目录下的```data/```即可。具体的数据格式可见根目录下的```examples/```
 
 ## Instruction
-安装环境依赖
+- 安装环境依赖
 ```sh
 pip install -r requirements.txt
 ```
@@ -51,28 +51,38 @@ python prepare_data.py --total 2000
 ```
 
 2. **从 HuggingFace Hub/Modelscope 下载预训练模型权重到本地**
-这里的model参数需为 HuggingFace 上的完整名称
+- 这里的model参数需为 HuggingFace 上的完整名称
 ```sh
 python download_pt.py --model Qwen/Qwen2.5-0.5B
 ```
 
 3. **LoRA 微调训练**
-训练/推理脚本二合一，deepspeed的配置文件为 ```deepspeed/deepspeed_config.json```
+- 训练/推理脚本二合一，deepspeed的配置文件为 ```deepspeed/deepspeed_config.json```
 ```sh
 cd deepspeed/
 python ft_LoRA_deepSpeed.py --train_mode True --test_mode True
+```
 
-# --data_dir, type=str, default="../data/", help="数据集目录"
-# --model_name, type=str, default="Qwen/Qwen2.5-0.5B", help="名称见 https://huggingface.co/"
-# --model_dir, type=str, default="../model/", help="所有模型存放目录"
-# --output_dir, type=str, default="output/", help="训练权重输出目录"
-# --ckpt_id, type=int, default=0, help="权重id"
-# --epochs, type=int, default=3
-# --batch_size, type=int, default=4
-# --max_tokens, type=int, default=4096, help="用于训练的最大 token 数"
-# --max_new_tokens, type=int, default=128, help="推理输出的最大 token 数"
-# --train_mode, type=bool, default=True, help="开启训练模式"
-# --test_mode, type=bool, default=True, help="开启测试模式"
+4. **QLoRA 微调训练**
+- 代码支持 4bit QLoRA 训练。配置文件为```deepspeed/bnb_config.json```，通过控制 args 来决定是否在训练和推理中以量化的形式加载，例如：
+
+```sh
+# 训练时量化
+python ft_LoRA_deepSpeed.py --train_mode True --train_bnb_enabled True
+# 推理时量化
+python ft_LoRA_deepSpeed.py --test_mode True --test_bnb_enabled True
+
+# Bitsandbytes 可配置项如下
+# load_in_8bit: bool = False,
+# load_in_4bit: bool = False,
+# llm_int8_threshold: float = 6,
+# llm_int8_skip_modules: Any | None = None,
+# llm_int8_enable_fp32_cpu_offload: bool = False,
+# llm_int8_has_fp16_weight: bool = False,
+# bnb_4bit_compute_dtype: Any | None = None,
+# bnb_4bit_quant_type: str = "fp4",
+# bnb_4bit_use_double_quant: bool = False,
+# bnb_4bit_quant_storage: Any | None = None,
 ```
 
 4. **Swanlab 配置**

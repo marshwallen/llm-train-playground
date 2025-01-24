@@ -1,7 +1,8 @@
 import torch
 from load_data import DataProcessor
 from peft import LoraConfig, TaskType, get_peft_model
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from bnb_config import load_bnb_config
 import swanlab
 import argparse
 import os
@@ -20,11 +21,14 @@ def train(args):
         args.model_dir + args.model_name, 
         trust_remote_code=True)
     
+    # bnb_config 为量化配置
     model = AutoModelForCausalLM.from_pretrained(
         args.model_dir + args.model_name, 
         device_map="auto", 
         torch_dtype=torch.bfloat16, 
-        trust_remote_code=True)
+        trust_remote_code=True,
+        quantization_config=load_bnb_config(args.train_bnb_enabled)
+        )
     
     # 2 加载数据集
     data_processor = DataProcessor(args, tokenizer)
@@ -86,19 +90,29 @@ def train(args):
 
             # SwanLab 记录训练数据(step)
             swanlab.log({"loss(step)": loss.item()})
+            global_grad_norm = model_engine.get_global_grad_norm()
+            if global_grad_norm:
+                swanlab.log({"grad_norm(step)": model_engine.get_global_grad_norm()})
+            else:
+                swanlab.log({"grad_norm(step)": 0})
+            swanlab.log({"lr(step)": model_engine.get_lr()[-1]})
 
         # Save checkpoint
         epoch_avg_loss = np.average(epoch_loss)
         if epoch_avg_loss < epoch_min_loss:
             epoch_min_loss = epoch_avg_loss
+            if args.train_bnb_enabled:
+                save_checkpoint_dir = os.path.join(args.output_dir, "DS-" + args.model_name + "-BNB")
+            else:
+                save_checkpoint_dir = os.path.join(args.output_dir, "DS-" + args.model_name)
+
             model_engine.save_checkpoint(
-                os.path.join(args.output_dir, "DS-" + args.model_name),
+                save_checkpoint_dir,
                 args.ckpt_id
                 )
             
         # SwanLab 记录训练数据(epoch)    
         swanlab.log({"loss(epoch)": epoch_avg_loss})
-
     # 在Jupyter Notebook中运行时要停止SwanLab记录，需要调用swanlab.finish()
     swanlab.finish()
 
@@ -118,7 +132,9 @@ def test_infer(args, max_new_tokens=128):
         args.model_dir + args.model_name, 
         device_map="auto", 
         torch_dtype=torch.bfloat16, 
-        trust_remote_code=True)
+        trust_remote_code=True,
+        quantization_config=load_bnb_config(args.test_bnb_enabled)
+        )
 
     # 读取测试数据
     data_processor = DataProcessor(args, tokenizer)
@@ -137,7 +153,12 @@ def test_infer(args, max_new_tokens=128):
     val_peft_model = get_peft_model(model, val_config)
 
     # 加载 DeepSpeed 训练好的权重
-    ds_state_dict = get_fp32_state_dict_from_zero_checkpoint(os.path.join(args.output_dir, "DS-" + args.model_name)) # already on cpu
+    if args.test_bnb_enabled:
+        save_checkpoint_dir = os.path.join(args.output_dir, "DS-" + args.model_name + "-BNB")
+    else:
+        save_checkpoint_dir = os.path.join(args.output_dir, "DS-" + args.model_name)
+
+    ds_state_dict = get_fp32_state_dict_from_zero_checkpoint(save_checkpoint_dir) # already on cpu
     val_peft_model = val_peft_model.cpu() # move to cpu
     val_peft_model.load_state_dict(ds_state_dict)
     val_peft_model.cuda()
@@ -199,17 +220,24 @@ def predict_deepspeed(messages, tokenizer, model, max_new_tokens):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    # Model directory
     parser.add_argument("--data_dir", type=str, default="../data/", help="数据集目录")
     parser.add_argument("--model_name", type=str, default="Qwen/Qwen2.5-0.5B", help="名称见 https://huggingface.co/")
     parser.add_argument("--model_dir", type=str, default="../model/", help="所有模型存放目录")
     parser.add_argument("--output_dir", type=str, default="output/", help="训练权重输出目录")
+
+    # Training
+    parser.add_argument("--train_mode", type=bool, help="开启训练模式")
     parser.add_argument("--ckpt_id", type=int, default=0, help="权重id")
     parser.add_argument("--epochs", type=int, default=3)
     parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--max_tokens", type=int, default=4096, help="用于训练的最大 token 数")
+    parser.add_argument("--train_bnb_enabled", type=bool, default=False, help="训练时是否启用量化")
+    
+    # Inference
+    parser.add_argument("--test_mode", type=bool, help="开启测试模式")
     parser.add_argument("--max_new_tokens", type=int, default=128, help="推理输出的最大 token 数")
-    parser.add_argument("--train_mode", type=bool, default=True, help="开启训练模式")
-    parser.add_argument("--test_mode", type=bool, default=True, help="开启测试模式")
+    parser.add_argument("--test_bnb_enabled", type=bool, default=False, help="推理时是否启用量化")
     
     args = parser.parse_args()
     if args.train_mode:

@@ -58,7 +58,7 @@ python download_pt.py --model Qwen/Qwen2.5-0.5B
 - LoRA 微调与 QLoRA 微调
 - 跳转：https://github.com/marshwallen/llm-train-playground/tree/main/deepspeed_ft
 
-## DeepSpeed + LLM API 蒸馏训练
+## DeepSpeed 蒸馏训练
 - 知识蒸馏将复杂的大型模型（教师模型）的知识迁移到较小的模型（学生模型）
 - 例如：DeepSeek-R1-Distill-Qwen、DeepSeek-R1-Distill-Llama 等
 - 100B 以上大模型蒸馏到本地 0.5-32B 小模型

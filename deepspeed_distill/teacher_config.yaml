@@ -1,0 +1,7 @@
+model:
+  deepseek:
+    api_key:
+    base_url: https://api.deepseek.com
+  qwen:
+    api_key:
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1

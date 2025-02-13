@@ -183,7 +183,8 @@ def test_infer(args, max_new_tokens=128):
     for sample in test_data:
         system_prompt = sample["system_prompt"]
         input_content = sample["user_prompt"]
-        teacher_response = sample["response"]
+        teacher_resp = sample["response"]
+        real_resp = sample["real_comment"]
 
         messages = [
             {"role": "system", "content": system_prompt},
@@ -194,7 +195,8 @@ def test_infer(args, max_new_tokens=128):
         messages.append({
             "role": "assistant", 
             "content": f"{response}", 
-            "teacher_response": teacher_response
+            "teacher_response": teacher_resp,
+            "real_response": real_resp
             })
         
         # Add to SwanLab
@@ -202,7 +204,8 @@ def test_infer(args, max_new_tokens=128):
             "System Prompt": messages[0]["content"],
             "User Prompt": messages[1]["content"],
             "Response": messages[2]['content'],
-            "Teacher Response": messages[2]['teacher_response']
+            "Teacher Response": messages[2]['teacher_response'],
+            "Real Response": messages[2]['real_response']
         }
         infer_result_str = json.dumps(infer_result, ensure_ascii=False, indent=4)
         r_list.append(swanlab.Text(infer_result_str))

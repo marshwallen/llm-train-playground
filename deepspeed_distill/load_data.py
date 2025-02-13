@@ -1,6 +1,5 @@
 from torch.utils.data import Dataset, DataLoader
 from transformers import DataCollatorForSeq2Seq
-import sys
 import json
 
 class CustomLLMDataset(Dataset):
@@ -19,7 +18,10 @@ class CustomLLMDataset(Dataset):
         sample = self.json_data[idx]
         system_prompt = sample["system_prompt"]
         input_content = sample["user_prompt"]
-        output_content = sample["response"]
+        teacher_resp = sample["response"]
+        real_resp = sample["real_comment"]
+
+        output_content = teacher_resp
 
         instruction = self.tokenizer(
             f"<|im_start|>system\n{system_prompt}<|im_end|>\n<|im_start|>user\n{input_content}<|im_end|>\n<|im_start|>assistant\n",

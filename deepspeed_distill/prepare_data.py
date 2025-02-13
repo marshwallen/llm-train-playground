@@ -47,7 +47,8 @@ def create_teacher_data(args, auto_resume=True):
             "id": id,
             "system_prompt": system_prompt,
             "user_prompt": user_prompt,
-            "response": response
+            "response": response,
+            "real_comment": data["conversations"][1]["value"]
         }) 
 
         if (i+1)%save_chunk_size==0 or i==len(json_data)-1:
@@ -63,15 +64,11 @@ if __name__ == "__main__":
     parser.add_argument("--model_name", type=str, default="deepseek-chat")
     args = parser.parse_args()
 
-    max_retry = 10
-    trys = 0
-    while trys < max_retry:
+    max_retry = 100
+    retry = 0
+    while retry < max_retry:
         try:
             create_teacher_data(args)
             break
         except Exception as e:
-            print(e)
-            trys += 1
-
-
-
+            retry += 1

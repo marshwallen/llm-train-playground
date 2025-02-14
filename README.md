@@ -101,9 +101,9 @@ python convert_model.py
 
 2. **模型发布到 Hugging Face Hub**
 
-    **1 注册 Hugging Face 账号 [链接](https://huggingface.co/)**
+- **1 注册 Hugging Face 账号 [链接](https://huggingface.co/)**
 
-    **2 安装 Git LFS (Linux)**
+- **2 安装 Git LFS (Linux)**
 
     Git LFS 是一个 Git 的扩展，用于管理大文件，如模型权重等
 ```sh

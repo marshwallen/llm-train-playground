@@ -104,6 +104,7 @@ python convert_model.py
     **1 注册 Hugging Face 账号 [链接](https://huggingface.co/)**
 
     **2 安装 Git LFS (Linux)**
+
     Git LFS 是一个 Git 的扩展，用于管理大文件，如模型权重等
 ```sh
 curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
@@ -112,6 +113,7 @@ git lfs install
 ```
 
 - **3 安装并登录 huggingface-cli**
+
 此过程需要 Access Token，需在 Hugging Face 个人中心设置
 ```sh
 pip install huggingface_hub
@@ -124,6 +126,7 @@ huggingface-cli repo create <仓库名称>
 ```
 
 - **5 仓库构建**
+
 把创建好的仓库 clone 下来，将转换好的模型权重和配置文件 copy 再到仓库中，最后 commit
 ```sh
 # 1 Clone 仓库

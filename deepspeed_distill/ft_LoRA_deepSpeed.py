@@ -161,7 +161,10 @@ def test_infer(args, max_new_tokens=128):
     else:
         save_checkpoint_dir = os.path.join(args.output_dir, "DS-" + args.student_model_name)
 
-    ds_state_dict = get_fp32_state_dict_from_zero_checkpoint(save_checkpoint_dir) # already on cpu
+    ds_state_dict = get_fp32_state_dict_from_zero_checkpoint(
+        save_checkpoint_dir, 
+        tag=str(args.ckpt_id)
+        )
     val_peft_model = val_peft_model.cpu() # move to cpu
     val_peft_model.load_state_dict(ds_state_dict)
     val_peft_model.cuda()
@@ -190,7 +193,7 @@ def test_infer(args, max_new_tokens=128):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": input_content}
         ]
-        response = predict_deepspeed(messages, tokenizer, model, max_new_tokens)
+        response = predict_deepspeed(messages, tokenizer, val_peft_model, max_new_tokens)
 
         messages.append({
             "role": "assistant", 

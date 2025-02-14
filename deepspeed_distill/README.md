@@ -77,7 +77,7 @@ python ft_LoRA_deepSpeed.py \
 "User Prompt": "下面我将给出B站某视频及其评论区的相关信息，请根据这些信息，模仿B站网友的说话风格，直接给出对该评论或该视频的可能的回复（限50字）：视频标题: 英特尔Lunar Lake正式发布，能效大提升？\n视频简介: 这次云飞和飘哥来到了德国柏林，参加英特尔酷睿Ultra 200V的发布会，等待已久终于要见到Lunar Lake的真身了！这颗专为轻薄本打造的低功耗芯片到底能有多省电？Windows PC的续航还有看头吗？我们拭目以待……\n父级评论内容: 回复 @xxx :x86直接装Linux不行吗？", 
 "Student Response (qwen-plus)": "楼上别带节奏，Linux确实香，但Windows在某些应用生态和兼容性上更有优势呢，而且这波Lunar Lake性能提升也太明显了。", 
 "Teacher Response (qwen-plus)": "x86装Linux确实可以，但很多办公软件在Linux上没有很好适配哦，对于普通用户不太友好呢。", 
-"Student Response (deepseek-chat)": "回复 @xxx : x86装Linux确实省电，但Windows的生态和兼容性还是香的，轻薄本还得看Windows啊！",
+"Student Response (deepseek-chat)": "回复：Linux确实省电，但Windows生态太香了，Office、游戏啥的都得装Windows啊！",
 "Teacher Response (deepseek-chat)": "回复 @xxx : x86装Linux当然可以，但驱动和优化可能不如Windows，续航也可能受影响。期待Lunar Lake的表现！",
 "Real Response": "回复 @xxx :其实要看测试软件支不支持，用Win还是因为兼容性好" 
 }
